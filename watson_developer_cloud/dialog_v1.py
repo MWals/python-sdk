@@ -17,23 +17,23 @@ The v1 Dialog service
 (https://www.ibm.com/watson/developercloud/dialog.html)
 """
 from __future__ import print_function
-from .watson_developer_cloud_service import WatsonDeveloperCloudService
+from .watson_service import WatsonService
 
 
-class DialogV1(WatsonDeveloperCloudService):
+class DialogV1(WatsonService):
     default_url = 'https://gateway.watsonplatform.net/dialog/api'
     dialog_json_format = 'application/wds+json'
     dialog_xml_format = 'application/wds+xml'
     dialog_binary_format = 'application/octet-stream'
 
     def __init__(self, url=default_url, **kwargs):
-        WatsonDeveloperCloudService.__init__(self, 'dialog', url, **kwargs)
+        WatsonService.__init__(self, 'dialog', url, **kwargs)
         print(
-            'WARNING: The Dialog service was deprecated, existing instances '
-            'of the service will continue to function'
-            'until August 9, 2017. See '
-            'https://www.ibm.com/watson/developercloud/doc/conversation'
-            '/migration.shtml')
+            'WARNING: The Dialog service was deprecated. Existing instances '
+            'of the service stopped functioning on August 9, 2017. '
+            'Dialog was replaced by the Conversation service. See '
+            'https://console.bluemix.net/docs/services/conversation'
+            '/index.html#about')
 
     def get_dialogs(self):
         return self.request(method='GET', url='/v1/dialogs', accept_json=True)

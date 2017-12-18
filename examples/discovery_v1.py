@@ -1,13 +1,14 @@
 # coding: utf-8
+from __future__ import print_function
 import json
-import watson_developer_cloud
+from watson_developer_cloud import DiscoveryV1
 
-discovery = watson_developer_cloud.DiscoveryV1(
-    '2016-11-07',
+discovery = DiscoveryV1(
+    version='2017-10-16',
     username='YOUR SERVICE USERNAME',
     password='YOUR SERVICE PASSWORD')
 
-environments = discovery.get_environments()
+environments = discovery.list_environments()
 print(json.dumps(environments, indent=2))
 
 news_environments = [x for x in environments['environments'] if
@@ -22,13 +23,6 @@ print(json.dumps(collections, indent=2))
 configurations = discovery.list_configurations(
     environment_id=news_environment_id)
 print(json.dumps(configurations, indent=2))
-default_config_id = discovery.get_default_configuration_id(
-    environment_id=news_environment_id)
-print(json.dumps(default_config_id, indent=2))
-
-default_config = discovery.get_configuration(
-    environment_id=news_environment_id, configuration_id=default_config_id)
-print(json.dumps(default_config, indent=2))
 
 query_options = {'query': 'IBM'}
 query_results = discovery.query(news_environment_id,

@@ -1,4 +1,6 @@
+from __future__ import print_function
 import json
+import os
 from watson_developer_cloud import ConversationV1
 
 #########################
@@ -11,9 +13,11 @@ conversation = ConversationV1(
     version='2017-04-21')
 
 # replace with your own workspace_id
-workspace_id = '0a0c06c1-8e31-4655-9067-58fcac5134fc'
+workspace_id = '506e4a2e-3d5d-4dca-b374-38edbb4139ab'
+if os.getenv("conversation_workspace_id") is not None:
+    workspace_id = os.getenv("conversation_workspace_id")
 
-response = conversation.message(workspace_id=workspace_id, message_input={
+response = conversation.message(workspace_id=workspace_id, input={
     'text': 'What\'s the weather like?'})
 print(json.dumps(response, indent=2))
 

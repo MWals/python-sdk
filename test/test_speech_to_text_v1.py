@@ -1,7 +1,10 @@
 # coding=utf-8
-import os,json,pytest
+import os
+import json
+import pytest
 import responses
 import watson_developer_cloud
+
 
 @responses.activate
 def test_success():
@@ -34,10 +37,11 @@ def test_success():
             audio_file, content_type='audio/l16; rate=44100')
 
     request_url = responses.calls[1].request.url
-    assert request_url == recognize_url + '?continuous=false'
+    assert request_url == recognize_url
     assert responses.calls[1].response.text == recognize_response
 
     assert len(responses.calls) == 2
+
 
 @responses.activate
 def test_get_model():
@@ -60,13 +64,9 @@ def _decode_body(body):
 
 @responses.activate
 def test_custom_model():
-
-    posted_data = """{\"name\": \"Example model\",
-  \"base_model_name\": \"en-US_BroadbandModel\",
-  \"description\": \"Example custom language model\"}"
-"https://stream.watsonplatform.net/speech-to-text/api/v1/customizations"""
-
     customization_url = 'https://stream.watsonplatform.net/speech-to-text/api/v1/customizations'
+    train_url = "{0}/{1}/train".format(customization_url,'customid')
+
     responses.add(responses.GET, customization_url,
                   body='{"get response": "yep"}', status=200,
                   content_type='application/json')
@@ -82,6 +82,9 @@ def test_custom_model():
     responses.add(responses.DELETE, "{0}/modelid".format(customization_url),
                   body='{"bogus_response": "yep"}', status=200,
                   content_type='application/json')
+
+    responses.add(responses.POST, train_url, body='{"bogus_response": "yep"}',
+                  status=200, content_type='application/json')
 
     speech_to_text = watson_developer_cloud.SpeechToTextV1(
         username="username", password="password")
@@ -101,15 +104,18 @@ def test_custom_model():
     assert parsed_body['description'] == ''
     assert parsed_body['base_model_name'] == 'en-US_BroadbandModel'
 
+    speech_to_text.train_custom_model('customid')
     speech_to_text.get_custom_model(modelid='modelid')
     speech_to_text.delete_custom_model(modelid='modelid')
 
-    assert len(responses.calls) == 5
+    assert len(responses.calls) == 6
+
 
 def test_custom_corpora():
 
     corpora_url = 'https://stream.watsonplatform.net/speech-to-text/api/v1/customizations/{0}/corpora'
-    get_corpora_url = '{0}/{1}'.format(corpora_url.format('customid'),'corpus')
+    get_corpora_url = '{0}/{1}'.format(
+        corpora_url.format('customid'), 'corpus')
 
     with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
         rsps.add(responses.GET, corpora_url.format('customid'),
@@ -154,10 +160,10 @@ def test_custom_words():
     words_url = 'https://stream.watsonplatform.net/speech-to-text/api/v1/customizations/{0}/words'
     word_url = 'https://stream.watsonplatform.net/speech-to-text/api/v1/customizations/{0}/words/{1}'
 
-    responses.add(responses.POST, word_url.format('custid','IEEE'),
-                 body='{"get response": "yep"}',
-                 status=200,
-                 content_type='application/json')
+    responses.add(responses.PUT, word_url.format('custid', 'IEEE'),
+                  body='{"get response": "yep"}',
+                  status=200,
+                  content_type='application/json')
 
     responses.add(responses.DELETE, word_url.format('custid', 'IEEE'),
                   body='{"get response": "yep"}',
@@ -170,22 +176,21 @@ def test_custom_words():
                   content_type='application/json')
 
     responses.add(responses.POST, words_url.format('custid'),
-                 body='{"get response": "yep"}',
-                 status=200,
-                 content_type='application/json')
+                  body='{"get response": "yep"}',
+                  status=200,
+                  content_type='application/json')
 
     responses.add(responses.GET, words_url.format('custid'),
-                 body='{"get response": "yep"}',
-                 status=200,
-                 content_type='application/json')
+                  body='{"get response": "yep"}',
+                  status=200,
+                  content_type='application/json')
 
     speech_to_text = watson_developer_cloud.SpeechToTextV1(
-    username="username", password="password")
+        username="username", password="password")
 
     custom_word = speech_to_text.CustomWord(word="IEEE",
                                             sounds_like=["i triple e"],
                                             display_as="IEEE")
-
 
     speech_to_text.add_custom_word(customization_id='custid',
                                    custom_word=custom_word)
@@ -207,17 +212,19 @@ def test_custom_words():
                                    custom_word=custom_word)
 
     speech_to_text.list_custom_words(customization_id='custid')
-    speech_to_text.list_custom_words(customization_id='custid', sort='alphabetical')
+    speech_to_text.list_custom_words(
+        customization_id='custid', sort='alphabetical')
     with pytest.raises(KeyError) as keyerror:
-        speech_to_text.list_custom_words(customization_id='custid', sort='badsort')
+        speech_to_text.list_custom_words(
+            customization_id='custid', sort='badsort')
     assert 'sort must be alphabetical or count' in str(keyerror.value)
 
-    speech_to_text.list_custom_words(customization_id='custid', word_type='all')
+    speech_to_text.list_custom_words(
+        customization_id='custid', word_type='all')
 
     with pytest.raises(KeyError) as keyerror:
-        speech_to_text.list_custom_words(customization_id='custid', word_type='badwordtype')
+        speech_to_text.list_custom_words(
+            customization_id='custid', word_type='badwordtype')
     assert 'word type must be all, user, or corpora' in str(keyerror.value)
 
     assert len(responses.calls) == 9
-
-

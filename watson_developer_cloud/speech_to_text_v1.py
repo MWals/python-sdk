@@ -16,18 +16,17 @@ The v1 Speech to Text service
 (https://www.ibm.com/watson/developercloud/speech-to-text.html)
 """
 
-from .watson_developer_cloud_service import WatsonDeveloperCloudService
+from .watson_service import WatsonService
 import json
 
 
-class SpeechToTextV1(WatsonDeveloperCloudService):
+class SpeechToTextV1(WatsonService):
     default_url = "https://stream.watsonplatform.net/speech-to-text/api"
 
     def __init__(self, url=default_url, **kwargs):
-        WatsonDeveloperCloudService.__init__(self, 'speech_to_text', url,
-                                             **kwargs)
+        WatsonService.__init__(self, 'speech_to_text', url, **kwargs)
 
-    def recognize(self, audio, content_type, continuous=False, model=None,
+    def recognize(self, audio, content_type, continuous=None, model=None,
                   customization_id=None,
                   inactivity_timeout=None,
                   keywords=None, keywords_threshold=None,
@@ -36,7 +35,8 @@ class SpeechToTextV1(WatsonDeveloperCloudService):
                   word_confidence=None, timestamps=None, interim_results=None,
                   profanity_filter=None,
                   smart_formatting=None,
-                  speaker_labels=None):
+                  speaker_labels=None,
+                  customization_weight=None):
         """
         Returns the recognized text from the audio input
         """
@@ -54,7 +54,8 @@ class SpeechToTextV1(WatsonDeveloperCloudService):
                   'interim_results': interim_results,
                   'profanity_filter': profanity_filter,
                   'smart_formatting': smart_formatting,
-                  'speaker_labels': speaker_labels}
+                  'speaker_labels': speaker_labels,
+                  'customization_weight': customization_weight}
 
         return self.request(method='POST', url='/v1/recognize',
                             headers=headers,
@@ -84,6 +85,20 @@ class SpeechToTextV1(WatsonDeveloperCloudService):
         return self.request(method='POST', url='/v1/customizations',
                             headers={'content-type': 'application/json'},
                             data=json_body, accept_json=True)
+
+    def train_custom_model(self, customization_id,
+                           customization_weight=None,
+                           word_type=None):
+        """
+        Trains a custom language model
+        """
+        params = {'customization_weight': customization_weight,
+                  'word_type': word_type}
+
+        return self.request(method='POST',
+                            url=('/v1/customizations/{0}/train'
+                                 .format(customization_id)), params=params,
+                            accept_json=True)
 
     def list_custom_models(self):
         return self.request(method='GET', url='/v1/customizations',
@@ -177,7 +192,7 @@ class SpeechToTextV1(WatsonDeveloperCloudService):
 
         custom_word_fragment = {'sounds_like': custom_word.sounds_like,
                                 'display_as': custom_word.display_as}
-        return self.request(method='POST',
+        return self.request(method='PUT',
                             url=url.format(customization_id,
                                            custom_word.word),
                             data=json.dumps(custom_word_fragment),

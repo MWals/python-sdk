@@ -19,7 +19,7 @@ from setuptools.command.test import test as TestCommand
 import os
 import sys
 
-__version__ = '0.26.0'
+__version__ = '1.0.2'
 
 if sys.argv[-1] == 'publish':
     # test server
@@ -64,8 +64,8 @@ setup(name='watson-developer-cloud',
       version=__version__,
       description='Client library to use the IBM Watson Services',
       license='Apache 2.0',
-      install_requires=['requests>=2.0, <3.0', 'pysolr>= 3.3, <4.0', 'pyOpenSSL>=16.2.0'],
-      tests_require=['responses', 'pytest', 'python_dotenv'],
+      install_requires=['requests>=2.0, <3.0', 'pysolr>= 3.3, <4.0', 'pyOpenSSL>=16.2.0', 'python_dateutil>=2.5.3'],
+      tests_require=['responses', 'pytest', 'python_dotenv', 'pytest-rerunfailures', 'tox'],
       cmdclass={'test': PyTest},
       author='Jeffrey Stylos',
       author_email='jsstylos@us.ibm.com',
@@ -74,16 +74,12 @@ setup(name='watson-developer-cloud',
       packages=['watson_developer_cloud'],
       include_package_data=True,
       keywords='alchemy datanews, language, vision, question and answer' +
-               ' tone_analyzer, natural language classifier, retrieve and '
-               'rank,' +
-               ' tradeoff analytics, text to speech,' +
-               ' language translation, language identification,' +
-               ' concept expansion, machine translation, personality '
-               'insights,' +
-               ' message resonance, watson developer cloud, wdc, watson, '
-               'ibm,' +
-               ' dialog, user modeling, alchemyapi, alchemy, tone analyzer,' +
-               'speech to text, visual recognition',
+      ' tone_analyzer, natural language classifier, retrieve and rank,' +
+      ' tradeoff analytics, text to speech, language translation, ' +
+      'language identification, concept expansion, machine translation, ' +
+      'personality insights, message resonance, watson developer cloud, ' +
+      ' wdc, watson, ibm, dialog, user modeling, alchemyapi, alchemy, ' +
+      'tone analyzer, speech to text, visual recognition',
       classifiers=[
           'Programming Language :: Python',
           'Programming Language :: Python :: 2',
@@ -97,4 +93,4 @@ setup(name='watson-developer-cloud',
           'Frameworks',
       ],
       zip_safe=True
-      )
+     )
