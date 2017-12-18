@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="LeftBumperPressed" type="0" type_size="1" nature="4" stm_value_name="LeftBumperPressed" inner="1" tooltip="LeftBumperPressed desc" id="4" /><Input name="RightBumperPressed" type="0" type_size="1" nature="4" stm_value_name="RightBumperPressed" inner="1" tooltip="RightBumperPressed desc" id="5" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="WatsonSTT" id="1" localization="8" tooltip="" x="321" y="40"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        import sys
+        self.logger.info("Checking if lib is in sys path")
+        try:
+            from StreamSTT import WatsonSTTWebSocketClient
+        except ImportError as exc:
+            # We need to get the lib directory in the path
+            import os
+            project_path = os.path.join(self.behaviorAbsolutePath(), '../lib')
+            if project_path not in sys.path:
+                self.logger.info("Appending {0} to sys.path".format(project_path));
+                sys.path.append(project_path)
+
+            # try again
+            from StreamSTT import WatsonSTTWebSocketClient
+
+        self.stt_client=None
+
+    def onUnload(self):
+        #put clean-up code here
+        if self.stt_client:
+            self.stt_client.close(0,"OK")
+        self.listening(0)
+
+    # Note that preferences can be set using qicli
+    # qicli call ALPreferenceManager.setValue 'watson' 'watsonSTTUsername' 'user'
+    def _getParamOrPref(self,key):
+        value=self.getParameter(key)
+        if not value or len(value)==0:
+            # Get from preferences
+            value=ALProxy("ALPreferenceManager").getValue(self.getParameter("Preference Domain"),key)
+        self.logger.info("Using pref {0}={1}".format(key,value))
+        return value
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        self.record()
+        self.listening(1)
+
+    def onInput_suspend(self):
+        self.logger.info("suspending")
+        #self.stt_client.suspendListen()
+        self.stt_client.close(0,"Suspend")
+        self.stt_client=None
+        self.listening(0)
+
+    def onInput_resume(self):
+        self.logger.info("resuming")
+        if not self.stt_client:
+            self.onInput_onStart()
+
+    def _transcript(self,final,confidence,transcript):
+        import sys
+        try:
+            transcript=transcript.encode(encoding='UTF-8',errors='replace')
+            #self.logger.info("** f={0} c={1} t={2} type(t)={3}".format(final,confidence,transcript,type(transcript)))
+            if final:
+                self.onInput_suspend()
+                self.onTranscription(transcript)
+                self.logger.info("=================================={0} CONFI:{1}".format(str(transcript), confidence))
+            else:
+                self.logger.info("**********************************{0} CONFI:{1} ".format(str(transcript), confidence))
+                self.onIntermediate(transcript)
+        except:
+            exc_type, exc_value, exc_traceback =sys.exc_info()
+            self.logger.info("Transcript exc_type={0}".format(exc_type))
+            self.logger.info("Transcript exc_value={0}".format(exc_value))
+            self.logger.info("Transcript exc_traceback={0}".format(exc_traceback.format_exc()))
+            self.onInput_suspend()
+            self.onTranscriptError()
+
+    def record(self):
+        self.logger.info("Loading WatsonSTTWebSocketClient")
+        from StreamSTT import WatsonSTTWebSocketClient
+
+        class NaoWatsonSTT(WatsonSTTWebSocketClient):
+            def __init__(self,outer,userName,password,rate,bits,model):
+                self.outer=outer
+                import time
+                WatsonSTTWebSocketClient.__init__(self,userName,password,rate=rate,bits=bits,model=model,timeout=-1,audioFilename="/tmp/AUDIO_{0}.wav".format(time.time()))
+
+            def info(self,msg):
+                self.outer.logger.info(msg)
+
+            def received_transcript(self,final,confidence,transcript):
+                self.outer._transcript(final,confidence,transcript)
+
+        self.stt_client=NaoWatsonSTT(self,self._getParamOrPref("watsonSTTUsername"),self._getParamOrPref("watsonSTTPassword"),self.getParameter("rate"),self.getParameter("bits"),self.getParameter("model"))
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="suspend" type="1" type_size="1" nature="1" inner="0" tooltip="" id="4" /><Input name="resume" type="1" type_size="1" nature="1" inner="0" tooltip="" id="5" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" /><Output name="onTranscription" type="0" type_size="1" nature="2" inner="0" tooltip="" id="7" /><Output name="listening" type="2" type_size="1" nature="2" inner="0" tooltip="" id="8" /><Output name="onIntermediate" type="3" type_size="1" nature="2" inner="0" tooltip="" id="9" /><Output name="onTranscriptError" type="1" type_size="1" nature="2" inner="0" tooltip="" id="10" /><Parameter name="rate" inherits_from_parent="0" content_type="1" value="16000" default_value="16000" min="8000" max="44200" tooltip="" id="11" /><Parameter name="bits" inherits_from_parent="0" content_type="1" value="16" default_value="16" min="8" max="32" tooltip="" id="12" /><Parameter name="watsonSTTUsername" inherits_from_parent="0" content_type="3" value="" default_value="" custom_choice="0" tooltip="" id="13" /><Parameter name="watsonSTTPassword" inherits_from_parent="0" content_type="3" value="" default_value="" custom_choice="0" tooltip="" id="14" /><Parameter name="model" inherits_from_parent="0" content_type="3" value="en-US_BroadbandModel" default_value="en-GB_BroadbandModel" custom_choice="0" tooltip="" id="15"><Choice value="fr-FR_BroadbandModel" /><Choice value="en-US_BroadbandModel" /><Choice value="es-ES_BroadbandModel" /><Choice value="en-GB_BroadbandModel" /></Parameter><Parameter name="Preference Domain" inherits_from_parent="0" content_type="3" value="watson" default_value="" custom_choice="0" tooltip="" id="16" /></Box><Box name="Say Text" id="3" localization="8" tooltip="Say the text received on its input." x="322" y="223"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALTextToSpeech')
+        self.ttsStop = ALProxy('ALTextToSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        self.logger.info("$$ p={0} type={1}".format(p,type(p)))
+        try:
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence))
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Resource name="Speech" type="Lock" timeout="0" /></Box><Box name="Show App" id="2" localization="8" tooltip="Loads the application on the tablet, if it exists, and displays the webview.&#x0A;&#x0A;V1.0.0&#x0A;" x="81" y="14"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[
+
+class MyClass(GeneratedClass):
+
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        self.isRunning = False
+
+    def onUnload(self):
+        self.isRunning = False
+
+    def _getTabletService(self):
+        tabletService = None
+        try:
+            tabletService = self.session().service("ALTabletService")
+        except Exception as e:
+            self.logger.error(e)
+        return tabletService
+
+    def onInput_onStart(self):
+        if self.isRunning:
+            return # already running, nothing to do
+        self.isRunning = True
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        appName = self.packageUid()
+        state = False
+        if appName:
+            if tabletService:
+                if tabletService.loadApplication(appName):
+                    self.logger.info("Successfully set application: %s" % appName)
+                    tabletService.showWebview()
+                    state = True
+                else:
+                    self.logger.warning("Got tablet service, but failed to set application: %s" % appName)
+            else:
+                self.logger.warning("Couldn't find tablet service, so can't set application: %s" % appName)
+        if state:
+            self.onSuccess()
+        else:
+            self.onFailure()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onSuccess" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished successfully." id="3" /><Output name="onFailure" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished unsuccessfully." id="4" /></Box><Box name="Raise Event" id="4" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="620" y="98"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), p)
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="Watson/TextFromSpeech" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Box name="Raise Event (1)" id="5" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="604" y="209"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), p)
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="Watson/Listening" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Box name="Raise Event (2)" id="6" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="652" y="343"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), p)
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="Watson/Intermediate" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Box name="Comment" id="7" localization="8" tooltip="To comment your behavior. Enter the text here and move the box where you like&#x0A;to add the comment.&#x0A;&#x0A;Note: This box is not functional and has no effect on the behavior." plugin="textedit_plugin" x="83" y="374"><bitmap>media/images/box/box-script.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("Shows how to use Watson Streaming STT API over WebSockets")]]></content></script><pluginContent><text><![CDATA[Shows how to use Watson Streaming STT API over WebSockets]]></text></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /></Box><Link inputowner="1" indexofinput="3" outputowner="0" indexofoutput="5" /><Link inputowner="1" indexofinput="3" outputowner="0" indexofoutput="4" /><Link inputowner="0" indexofinput="6" outputowner="1" indexofoutput="6" /><Link inputowner="3" indexofinput="2" outputowner="1" indexofoutput="7" /><Link inputowner="1" indexofinput="5" outputowner="3" indexofoutput="4" /><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="1" indexofinput="2" outputowner="2" indexofoutput="3" /><Link inputowner="4" indexofinput="2" outputowner="1" indexofoutput="7" /><Link inputowner="5" indexofinput="2" outputowner="1" indexofoutput="8" /><Link inputowner="1" indexofinput="5" outputowner="1" indexofoutput="10" /><Link inputowner="6" indexofinput="2" outputowner="1" indexofoutput="9" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

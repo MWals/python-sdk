@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package version="0.0.0" uuid="lab3s_watsonstreamingstt-1a6513">
+ <names>
+  <name lang="en_US">WatsonSTTStream</name>
+ </names>
+ <descriptions>
+  <description lang="en_US">WatsonSTT</description>
+ </descriptions>
+ <supportedLanguages>
+  <language>en_US</language>
+  <language>fr_FR</language>
+  <language>it_IT</language>
+  <language>ru_RU</language>
+  <language>de_DE</language>
+  <language>es_ES</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+  <language>fr_FR</language>
+  <language>it_IT</language>
+  <language>ru_RU</language>
+  <language>de_DE</language>
+  <language>es_ES</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path="behavior_1">
+   <userRequestable/>
+   <nature>interactive</nature>
+   <permissions/>
+  </behaviorContent>
+ </contents>
+</package>
