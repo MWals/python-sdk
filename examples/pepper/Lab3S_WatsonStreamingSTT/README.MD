@@ -5,7 +5,7 @@ You will need to set-up your Watson STT API username and key.
 
 The Watson STT python box is setup to get the Watson STT API key from either
   * the box parameters:  
-![img-paste-20171218143216224.png](readme_images\theWatsonSTTPythonBoxIsSetupToGetTheWatsonSTTAPIKeyFromEitherTheBoxParameters.png)  
+![Watson STT box parameters](readme_images/theWatsonSTTPythonBoxIsSetupToGetTheWatsonSTTAPIKeyFromEitherTheBoxParameters.png)  
   * or from the ALPreferenceManager preferences' ```watson``` domain, that you can setup either through python code or from the robot shell using ```qicli``` command:
 ```
 qicli call ALPreferenceManager.setValue 'watson' 'watsonSTTUsername' '125604b9-9876-ab12-1234-6bd0f53430e7'
