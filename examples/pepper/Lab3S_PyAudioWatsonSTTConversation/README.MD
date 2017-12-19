@@ -5,14 +5,14 @@ You will need to set-up your Watson STT and Conversation API username and key.
 
 The Watson STT_PyAudio python box is setup to get the Watson STT API key from either
   * the box parameters:  
-![img-paste-20171218143216224.png](readme_images\theWatsonSTTPythonBoxIsSetupToGetTheWatsonSTTAPIKeyFromEitherTheBoxParameters.png)  
+![STT Box Parameters](readme_images/theWatsonSTTPythonBoxIsSetupToGetTheWatsonSTTAPIKeyFromEitherTheBoxParameters.png)  
   * or from the ALPreferenceManager preferences' ```watson``` domain, that you can setup either through python code or from the robot shell using ```qicli``` command:
 ```
 qicli call ALPreferenceManager.setValue 'watson' 'watsonSTTUsername' '125604b9-9876-ab12-1234-6bd0f53430e7'
 qicli call ALPreferenceManager.setValue 'watson' 'watsonSTTPassword' 'rrVMTw0NcvLH'
 ```
 Similarly, the Watson Conversation box is setup to get the Watson Conversation userid, password and workspace ID from either 
-   * the bos parameters: ![img-paste-20171218171038627.png](readme_images\img-paste-20171218171038627.png)
+   * the box parameters: ![Conversation Box Parameters](readme_images/img-paste-20171218171038627.png)
    * or the ALPreferenceManager preferences' ```watson``` domain
 ```
 qicli call ALPreferenceManager.setValue 'watson' 'watsonConversationWorkspaceId' 'fe657ac7-1615-4d08-8bb1-2ad0d0b88b2a'
