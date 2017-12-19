@@ -1,0 +1,90 @@
+<!--
+# Copyright 2017 IBM All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-->
+<html>
+  <head>
+    <!-- Adjust for Pepper tablet -->
+    <meta content="width=1280, user-scalable=0" name="viewport" />
+    
+    <!-- Get JQuery -->
+    <style>
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        /*font-size: 200%;*/
+      }
+      header {
+        width: 100%;
+        height: 60px;
+        background: blue;
+        position: fixed;
+        top: 0;
+      }
+      #header_title {
+        color: white;
+        font-size: 40px;
+      }
+      #content {
+        width: 90%;
+        margin: 60px 0px auto auto;
+        font-family: sans-serif;
+        font-size: 200%;
+      }
+      canvas {
+        border:1px solid #000000;
+      }
+      footer {
+        width: 100%;
+        height: 60px;
+        background: blue;
+        position: fixed;
+        bottom: 0;
+      }
+      button {
+        font-size: 300%;
+        color: cyan;
+        background: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <header><table width=100% border="0"><tr>
+      <td id="header_title">Watson Conversation</td>
+      <td align="right"><img src="images/ibm_watson_logo.jpg" height="60px"/></td>
+		</tr></table></header>
+    <div id="content">
+      <p>Question: <b qi-sub="Watson/Question">?</b></p>
+      <hr />
+      <p>Answer: <b qi-sub="Watson/Answer">?</b></p>
+      <img src="images/recording_64.png" qi-hide="!Watson/Listening" hidden/>
+      <img src="images/pause_64.png" qi-hide="Watson/Listening"/>
+    </div>
+    <footer><table width=100% border="0"><tr>
+      <td align="right"><img src="images/logo-ibm2.png" height="60px"/></td>
+		</tr></table></footer>
+    
+    <!-- Load QiMessaging -->
+    <script src="http://198.18.0.1/libs/qimessaging/2/qimessaging.js"></script>
+    <script>
+      var qi=Object;
+      qi.ready=function() {
+        qi.log("Qi ready");
+      }
+    </script>
+    <script src="ibm_phg_qi.js"></script>
+  </body>
+</html>
