@@ -30,11 +30,10 @@
         <File name="pause_64" src="html/images/pause_64.png" />
         <File name="recording_64" src="html/images/recording_64.png" />
         <File name="README" src="README.MD" />
-        <File name="" src="assets/.png" />
         <File name="theWatsonSTTPythonBoxIsSetupToGetTheWatsonSTTAPIKeyFromEitherTheBoxParameters" src="assets/theWatsonSTTPythonBoxIsSetupToGetTheWatsonSTTAPIKeyFromEitherTheBoxParameters.png" />
-        <File name="img-paste-20171218143216224" src="img-paste-20171218143216224.png" />
         <File name="ibm_phg_qi" src="html/ibm_phg_qi.js" />
         <File name="ibm_watson_logo" src="html/images/ibm_watson_logo.jpg" />
+        <File name="theWatsonSTTPythonBoxIsSetupToGetTheWatsonSTTAPIKeyFromEitherTheBoxParameters" src="readme_images/theWatsonSTTPythonBoxIsSetupToGetTheWatsonSTTAPIKeyFromEitherTheBoxParameters.png" />
     </Resources>
     <Topics />
     <IgnoredPaths />
